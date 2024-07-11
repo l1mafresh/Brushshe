@@ -74,7 +74,7 @@ class Brushshe(CTk):
         brush_size_label = CTkLabel(tools_frame, text="Пензль:")
         brush_size_label.pack(side=LEFT, padx=1)
 
-        size_scale = CTkSlider(tools_frame, from_=1, to=20, command=self.change_brush_size)
+        size_scale = CTkSlider(tools_frame, from_=1, to=50, command=self.change_brush_size)
         self.brush_size = 2
         size_scale.set(self.brush_size)
         size_scale.pack(side=LEFT, padx=5)
@@ -104,10 +104,11 @@ class Brushshe(CTk):
         self.draw = ImageDraw.Draw(self.image)
         self.photo = None
 
-        self.drawing = False
-        self.current_line = []
-
-        self.canvas.bind("<B1-Motion>", self.paint)
+        self.prev_x = None
+        self.prev_y = None
+        
+        self.canvas.bind('<B1-Motion>', self.paint)
+        self.canvas.bind('<ButtonRelease-1>', self.stoppaint)
         self.canvas.bind("<Button-1>", self.on_canvas_click)
 
     def when_closing(self):
@@ -117,32 +118,24 @@ class Brushshe(CTk):
         response = closing_msg.get()
         if response=="Ні":
             app.destroy()
-        elif response== "Назад в Brushshe":
-            pass
-        else:
+        elif response== "Зберегти":
             self.save_img()
+        else:
+            pass
 
-    def paint(self, event):
-        if self.drawing:
-            x, y = event.x, event.y
-            radius = self.brush_size
-            self.canvas.create_line(self.current_line + [x, y], fill=self.color, width=2*radius)
-            self.draw.line(self.current_line + [x, y], fill=self.color, width=2*radius)
-            self.current_line = [x, y]
+    def paint(self, cur):
+        if self.prev_x is not None and self.prev_y is not None:
+            self.canvas.create_line(self.prev_x, self.prev_y, cur.x, cur.y, width=self.brush_size, fill=self.color,
+                               smooth=True, capstyle=ROUND)
+        self.prev_x, self.prev_y = cur.x, cur.y
 
-    def add_sticker(self, image, x, y):
-        self.canvas.create_image(x, y, anchor=CENTER, image=image)
-
-    def set_current_sticker(self, image):
-        self.current_sticker = image
+    def stoppaint(self, cur):
+        self.prev_x, self.prev_y = (None, None)
 
     def on_canvas_click(self, event):
         if hasattr (self, "current_sticker") and self.current_sticker:
             self.add_sticker(self.current_sticker, event.x, event.y)
             self.current_sticker = None
-        else:
-            self.drawing = True
-            self.current_line = [event.x, event.y]
 
     def save_img(self):
         # позиції канви
@@ -180,6 +173,12 @@ class Brushshe(CTk):
 
     def change_bg(self, new_color):
         self.canvas.configure(bg=new_color)
+
+    def add_sticker(self, image, x, y):
+        self.canvas.create_image(x, y, anchor=CENTER, image=image)
+
+    def set_current_sticker(self, image):
+        self.current_sticker = image
 
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",

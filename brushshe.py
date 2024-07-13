@@ -5,6 +5,7 @@ from CTkColorPicker import *
 from CTkMessagebox import *
 from PIL import Image, ImageDraw, ImageTk, ImageGrab, ImageFont
 from tkinter import EventType, PhotoImage
+import gc
 
 class Brushshe(CTk):
     def __init__(self):
@@ -127,6 +128,8 @@ class Brushshe(CTk):
 
         self.font_size = 24
         self.size_a = 100
+
+        gc.disable() # бо ввімкнений gc думає що додані наліпки і текст - це сміття
         
         self.canvas.bind('<B1-Motion>', self.paint)
         self.canvas.bind('<ButtonRelease-1>', self.stop_paint)
@@ -294,7 +297,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.3",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.3.1",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):

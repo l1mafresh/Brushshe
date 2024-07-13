@@ -5,7 +5,6 @@ from CTkColorPicker import *
 from CTkMessagebox import *
 from PIL import Image, ImageDraw, ImageTk, ImageGrab, ImageFont
 from tkinter import EventType, PhotoImage
-from tkinter import font as tkfont
 
 class Brushshe(CTk):
     def __init__(self):
@@ -14,6 +13,7 @@ class Brushshe(CTk):
         self.geometry("650x580")
         self.iconphoto(True, PhotoImage(file="icon.png"))
         set_default_color_theme("brushshe_theme.json")
+        set_appearance_mode("system")
         self.protocol("WM_DELETE_WINDOW", self.when_closing)
 
         self.setup_menubar()
@@ -58,6 +58,7 @@ class Brushshe(CTk):
         dropdown3.add_option(option="Інший колір", command=self.other_bg_color)
 
         stickers_menu = menu.add_cascade("Наліпки", command=self.show_sticker_choose)
+        # ширина і висота всіх зображень стікерів - 88 px
         self.stickers = {
             "Смайл": Image.open("stickers/smile.png"),
             "Квітка": Image.open("stickers/flower.png"),
@@ -66,7 +67,10 @@ class Brushshe(CTk):
             "Сир": Image.open("stickers/cheese.png")
         }
 
-        add_text_menu = menu.add_cascade("Додати текст", command=self.add_text_window_show)
+        add_text_menu = menu.add_cascade("Текст")
+        dropdown4 = CustomDropdownMenu(widget=add_text_menu)
+        dropdown4.add_option(option="Додати текст на малюнок", command=self.add_text_window_show)
+        dropdown4.add_option(option="Змінити розмір", command=self.change_text_size_show)
 
         about_menu = menu.add_cascade("Про Brushshe", command=self.about_program)
 
@@ -80,13 +84,13 @@ class Brushshe(CTk):
         brush_size_label = CTkLabel(tools_frame, text="Пензль:")
         brush_size_label.pack(side=LEFT, padx=1)
 
-        size_scale = CTkSlider(tools_frame, from_=1, to=50, command=self.change_brush_size)
+        size_slider = CTkSlider(tools_frame, from_=1, to=50, command=self.change_brush_size)
         self.brush_size = 2
-        size_scale.set(self.brush_size)
-        size_scale.pack(side=LEFT, padx=5)
+        size_slider.set(self.brush_size)
+        size_slider.pack(side=LEFT, padx=5)
 
-        self.size_scale_label = CTkLabel(tools_frame, text="2")
-        self.size_scale_label.pack(side=LEFT, padx=1)
+        self.size_slider_label = CTkLabel(tools_frame, text="2")
+        self.size_slider_label.pack(side=LEFT, padx=1)
 
     def setup_canvas(self):
         self.canvas = CTkCanvas(self, bg="white")
@@ -120,6 +124,9 @@ class Brushshe(CTk):
 
         self.prev_x = None
         self.prev_y = None
+
+        self.font_size = 24
+        self.size_a = 100
         
         self.canvas.bind('<B1-Motion>', self.paint)
         self.canvas.bind('<ButtonRelease-1>', self.stop_paint)
@@ -191,7 +198,7 @@ class Brushshe(CTk):
         self.canvas.configure(bg=new_color)
 
     def other_bg_color(self):
-        pick_color = AskColor(title = "Оберіть інший колір тла")
+        pick_color = AskColor(title="Оберіть інший колір тла")
         bg_getcolor = pick_color.get()
         if bg_getcolor:
             self.canvas.configure(bg=bg_getcolor)
@@ -199,17 +206,44 @@ class Brushshe(CTk):
     def show_sticker_choose(self):
         sticker_choose = CTkToplevel(app)
         sticker_choose.title("Оберіть наліпку")
-        row = 0
-        column = 0
-        for name, image in self.stickers.items():
-            image = ImageTk.PhotoImage(image)
-            sticker_btn = CTkButton(sticker_choose, text=None, image=image,
-                                    command=lambda img=image: self.set_current_sticker(img))
-            sticker_btn.grid(row=row, column=column, padx=10, pady=10)
-            column +=1
-            if column == 2:
+
+        # Segmented Button
+        def segmented_button_callback(value):
+            for widget in stickers_frame.winfo_children():
+                widget.destroy()
+                
+            if value == "Обрати наліпку":
+                row = 0
                 column = 0
-                row +=1
+                for name, image in self.stickers.items():
+                    resized_image = image.resize((self.size_a, self.size_a))
+                    image = ImageTk.PhotoImage(resized_image)
+                    sticker_btn = CTkButton(stickers_frame, text=None, image=image,
+                                            command=lambda img=image: self.set_current_sticker(img))
+                    sticker_btn.grid(row=row, column=column, padx=10, pady=10)
+                    column +=1
+                    if column == 2:
+                        column = 0
+                        row +=1
+            elif value == "Розмір наліпок":
+                self.st_size_label = CTkLabel(stickers_frame, text=self.size_a)
+                self.st_size_label.pack()
+                self.st_slider = CTkSlider(stickers_frame, from_=10, to=175, command=self.change_sticker_size)
+                self.st_slider.set(self.size_a)
+                self.st_slider.pack()
+                set_default = CTkButton(stickers_frame, text="Повернути як було", command=self.set_default_stickers_size)
+                set_default.pack()
+                
+        segemented_button = CTkSegmentedButton(sticker_choose, values=["Обрати наліпку", "Розмір наліпок"],
+                                                     command=segmented_button_callback)
+        segemented_button.set("Обрати наліпку")
+        segemented_button.pack()
+        
+        # Фрейм
+        stickers_frame = CTkFrame(master=sticker_choose)
+        stickers_frame.pack()
+
+        segmented_button_callback("Обрати наліпку")
 
     def add_sticker(self, image, x, y):
         self.canvas.create_image(x, y, anchor=CENTER, image=image)
@@ -217,49 +251,58 @@ class Brushshe(CTk):
     def set_current_sticker(self, image):
         self.current_sticker = image
 
+    def change_sticker_size(self, value):
+        self.size_a = int(self.st_slider.get())
+        self.st_size_label.configure(text=self.size_a)
+
+    def set_default_stickers_size(self):
+        self.size_a = 100
+        self.st_size_label.configure(text=self.size_a)
+        self.st_slider.set(self.size_a)
+
     def add_text_window_show(self):
-        dialog = CTkInputDialog(text="а потім клацніть на потрібне місце на малюнку", title="Введіть текст")
+        dialog = CTkInputDialog(title="Введіть текст,", text="а потім клацніть на потрібне місце на малюнку")
         text = dialog.get_input()
         if text:
             self.canvas.bind("<Button-1>", lambda event, t=text: self.add_text(event, text))
 
     def add_text(self, event, text):
-        font_size = 24
-        font = ImageFont.truetype("font/NotoSans-Regular.ttf", size=font_size)
+        font = ImageFont.truetype("font/NotoSans-Regular.ttf", size=self.font_size)
         x, y = event.x, event.y
         self.draw.text((x, y), text, fill=self.color, font=font)
         
-        tk_font = tkfont.Font(family="NotoSans", size=font_size)
+        tk_font = CTkFont(family="NotoSans", size=self.font_size)
         self.canvas.create_text(x, y, text=text, fill=self.color, font=tk_font)
         self.canvas.unbind("<Button-1>")
 
         self.canvas.bind('<B1-Motion>', self.paint)
         self.canvas.bind('<ButtonRelease-1>', self.stop_paint)
         self.canvas.bind("<Button-1>", self.on_canvas_click)
+
+    def change_text_size_show(self):
+        change_tx_size = CTkToplevel(app)
+        change_tx_size.title("Змінити розмір тексту")
+        self.tx_size_label = CTkLabel(change_tx_size, text=self.font_size)
+        self.tx_size_label.pack()
+        tx_size_slider = CTkSlider(change_tx_size, from_=11, to=96, command=self.change_text_size)
+        tx_size_slider.set(self.font_size)
+        tx_size_slider.pack()
+
+    def change_text_size(self, size):
+        self.font_size = int(size)
+        self.tx_size_label.configure(text=self.font_size)
         
     def about_program(self):
-        about = CTkToplevel(app)
-        about.title("Про програму")
-        about_text = """Brushshe (Брашше) - програма для малювання,
-        в якій можна створювати те, що Вам подобається.
-
-        Орел на ім'я Brucklin (Браклін) - її талісман.
-        
-        https://github.com/l1mafresh/Brushshe
-
-        v0.2"""
-        about_label = CTkLabel(about, text=about_text)
-        about_label.pack(side=LEFT, padx=1)
-        brucklin = CTkImage(light_image=Image.open("icons/brucklin.png"), size=(150,191))
-        brucklin_label = CTkLabel(about, image=brucklin, text="")
-        brucklin_label.pack(side=LEFT, padx=1)
+        about_msg = CTkMessagebox(title="Про програму",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.3",
+                                  icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):
         self.canvas.delete("all")
 
     def change_brush_size(self, size):
         self.brush_size = int(size)
-        self.size_scale_label.configure(text=self.brush_size)
+        self.size_slider_label.configure(text=self.brush_size)
 
     def change_color(self, new_color):
         self.color = new_color

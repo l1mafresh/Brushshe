@@ -17,14 +17,8 @@ class Brushshe(CTk):
         set_appearance_mode("system")
         self.protocol("WM_DELETE_WINDOW", self.when_closing)
 
-        self.setup_menubar()
-        self.setup_tools_frame()
-        self.setup_canvas()
-        self.setup_color_frame()
-        self.setup_initialize()
-
     # -------------------- Інтерфейс --------------------
-    def setup_menubar(self):
+# Меню
         menu = CTkMenuBar(self)
         
         file_menu = menu.add_cascade("Файл")
@@ -75,7 +69,7 @@ class Brushshe(CTk):
 
         about_menu = menu.add_cascade("Про Brushshe", command=self.about_program)
 
-    def setup_tools_frame(self):
+# Панель інструментів
         tools_frame = CTkFrame(self)
         tools_frame.pack(side=TOP, fill=X)
 
@@ -93,11 +87,11 @@ class Brushshe(CTk):
         self.size_slider_label = CTkLabel(tools_frame, text="2")
         self.size_slider_label.pack(side=LEFT, padx=1)
 
-    def setup_canvas(self):
+# Канва
         self.canvas = CTkCanvas(self, bg="white")
         self.canvas.pack(fill=BOTH, expand=True)
 
-    def setup_color_frame(self):
+# Панель кольорів
         self.color_frame = CTkFrame(self)
         self.color_frame.pack(side=BOTTOM, fill=X)
 
@@ -116,7 +110,6 @@ class Brushshe(CTk):
         self.other_color_btn = CTkButton(self.color_frame, text=None, width=35, border_width=2, command=self.changecolor2)
 
     # -------------------- Ініціалізація --------------------
-    def setup_initialize(self):
         self.color = "black"
 
         self.image = Image.new("RGB", (800, 600), "white")
@@ -130,7 +123,10 @@ class Brushshe(CTk):
         self.size_a = 100
 
         gc.disable() # бо ввімкнений gc думає що додані наліпки і текст - це сміття
-        
+
+        self.setup_initialize()
+
+    def setup_initialize(self):
         self.canvas.bind('<B1-Motion>', self.paint)
         self.canvas.bind('<ButtonRelease-1>', self.stop_paint)
         self.canvas.bind("<Button-1>", self.on_canvas_click)
@@ -207,7 +203,7 @@ class Brushshe(CTk):
             self.canvas.configure(bg=bg_getcolor)
         
     def show_sticker_choose(self):
-        sticker_choose = CTkToplevel(app)
+        sticker_choose = CTkToplevel(app, width=300, height=420)
         sticker_choose.title("Оберіть наліпку")
 
         # Segmented Button
@@ -243,7 +239,7 @@ class Brushshe(CTk):
         segemented_button.pack()
         
         # Фрейм
-        stickers_frame = CTkFrame(master=sticker_choose)
+        stickers_frame = CTkScrollableFrame(sticker_choose, width=300, height=400)
         stickers_frame.pack()
 
         segmented_button_callback("Обрати наліпку")
@@ -278,9 +274,7 @@ class Brushshe(CTk):
         self.canvas.create_text(x, y, text=text, fill=self.color, font=tk_font)
         self.canvas.unbind("<Button-1>")
 
-        self.canvas.bind('<B1-Motion>', self.paint)
-        self.canvas.bind('<ButtonRelease-1>', self.stop_paint)
-        self.canvas.bind("<Button-1>", self.on_canvas_click)
+        self.setup_initialize()
 
     def change_text_size_show(self):
         change_tx_size = CTkToplevel(app)
@@ -297,7 +291,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.3.1",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.3.2",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):
@@ -309,6 +303,7 @@ class Brushshe(CTk):
 
     def change_color(self, new_color):
         self.color = new_color
+        pass
 
     def other_color_choise(self):
         try:

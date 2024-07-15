@@ -4,7 +4,7 @@ from CTkMenuBar import *
 from CTkColorPicker import *
 from CTkMessagebox import *
 from PIL import Image, ImageDraw, ImageTk, ImageGrab
-from tkinter import EventType, PhotoImage
+from tkinter import EventType, PhotoImage, font
 import gc
 import os
 import uuid
@@ -64,6 +64,7 @@ class Brushshe(CTk):
             "Сир": Image.open("stickers/cheese.png"),
             "Трава": Image.open("stickers/grass.png"),
             "Дощ": Image.open("stickers/rain.png"),
+            "Браклін": Image.open("stickers/brucklin.png"),
             "Полуниця": Image.open("stickers/strawberry.png"),
             "Метелик": Image.open("stickers/butterfly.png"),
             "Квітка2": Image.open("stickers/flower2.png")
@@ -72,7 +73,7 @@ class Brushshe(CTk):
         add_text_menu = menu.add_cascade("Текст")
         dropdown4 = CustomDropdownMenu(widget=add_text_menu)
         dropdown4.add_option(option="Додати текст на малюнок", command=self.add_text_window_show)
-        dropdown4.add_option(option="Змінити розмір", command=self.change_text_size_show)
+        dropdown4.add_option(option="Налаштувати текст для вставлення", command=self.text_settings)
 
         my_gallery_menu = menu.add_cascade("Моя галерея", command=self.show_gallery_window)
 
@@ -132,6 +133,7 @@ class Brushshe(CTk):
         self.prev_y = None
 
         self.font_size = 24
+        self.tk_font = CTkFont(size=self.font_size)
         self.size_a = 100
 
         gc.disable() # бо ввімкнений gc думає що додані наліпки і текст - це сміття
@@ -279,23 +281,31 @@ class Brushshe(CTk):
             self.canvas.bind("<Button-1>", lambda event, t=text: self.add_text(event, text))
 
     def add_text(self, event, text):
-        tk_font = CTkFont(size=self.font_size)
-        self.canvas.create_text(event.x, event.y, text=text, fill=self.color, font=tk_font)
+        self.canvas.create_text(event.x, event.y, text=text, fill=self.color, font=self.tk_font)
         self.canvas.unbind("<Button-1>")
         self.setup_initialize()
 
-    def change_text_size_show(self):
-        change_tx_size = CTkToplevel(app)
-        change_tx_size.title("Змінити розмір тексту")
-        self.tx_size_label = CTkLabel(change_tx_size, text=self.font_size)
+    def text_settings(self):
+        text_settings = CTkToplevel(app)
+        text_settings.title("Налаштувати текст")
+        self.tx_size_label = CTkLabel(text_settings, text=self.font_size)
         self.tx_size_label.pack()
-        tx_size_slider = CTkSlider(change_tx_size, from_=11, to=96, command=self.change_text_size)
+        tx_size_slider = CTkSlider(text_settings, from_=11, to=96, command=self.change_text_size)
         tx_size_slider.set(self.font_size)
         tx_size_slider.pack()
+
+        fonts_label = CTkLabel(text_settings, text="Шрифти з системи:")
+        fonts_label.pack()
+        fonts = list(font.families())
+        fonts_optionmenu = CTkOptionMenu(text_settings, values=fonts, command=self.optionmenu_callback)
+        fonts_optionmenu.pack()
 
     def change_text_size(self, size):
         self.font_size = int(size)
         self.tx_size_label.configure(text=self.font_size)
+
+    def optionmenu_callback(self, value):
+        self.tk_font = CTkFont(family=value, size=self.font_size)
 
     def show_gallery_window(self):
         my_gallery = CTkToplevel(app)
@@ -335,7 +345,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.2",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.3",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):

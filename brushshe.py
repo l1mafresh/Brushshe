@@ -3,7 +3,7 @@ from customtkinter import filedialog
 from CTkMenuBar import *
 from CTkColorPicker import *
 from CTkMessagebox import *
-from PIL import Image, ImageDraw, ImageTk, ImageGrab, ImageFont
+from PIL import Image, ImageDraw, ImageTk, ImageGrab
 from tkinter import EventType, PhotoImage
 import gc
 import os
@@ -335,7 +335,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.2",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):

@@ -139,8 +139,8 @@ class Brushshe(CTk):
         self.setup_initialize()
 
     def setup_initialize(self):
-        self.canvas.bind('<B1-Motion>', self.paint)
-        self.canvas.bind('<ButtonRelease-1>', self.stop_paint)
+        self.canvas.bind("<B1-Motion>", self.paint)
+        self.canvas.bind("<ButtonRelease-1>", self.stop_paint)
         self.canvas.bind("<Button-1>", self.on_canvas_click)
 
     # -------------------- Функціонал --------------------
@@ -149,15 +149,15 @@ class Brushshe(CTk):
                                     option_1="Ні", option_2="Зберегти", option_3="Назад в Brushshe",
                                     icon="icons/question.png", icon_size=(100,100), sound=True)
         response = closing_msg.get()
-        if response=="Ні":
+        if response == "Ні":
             app.destroy()
-        elif response== "Зберегти":
+        elif response == "Зберегти":
             self.save_in_gallery()
         else:
             pass
 
     def paint(self, cur):
-        if self.prev_x is not None and self.prev_y is not None:
+        if self.prev_x and self.prev_y:
             self.canvas.create_line(self.prev_x, self.prev_y, cur.x, cur.y, width=self.brush_size, fill=self.color,
                                smooth=True, capstyle=ROUND)
         self.prev_x, self.prev_y = cur.x, cur.y
@@ -279,14 +279,9 @@ class Brushshe(CTk):
             self.canvas.bind("<Button-1>", lambda event, t=text: self.add_text(event, text))
 
     def add_text(self, event, text):
-        font = ImageFont.truetype("font/NotoSans-Regular.ttf", size=self.font_size)
-        x, y = event.x, event.y
-        self.draw.text((x, y), text, fill=self.color, font=font)
-        
-        tk_font = CTkFont(family="NotoSans", size=self.font_size)
-        self.canvas.create_text(x, y, text=text, fill=self.color, font=tk_font)
+        tk_font = CTkFont(size=self.font_size)
+        self.canvas.create_text(event.x, event.y, text=text, fill=self.color, font=tk_font)
         self.canvas.unbind("<Button-1>")
-
         self.setup_initialize()
 
     def change_text_size_show(self):
@@ -340,7 +335,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):

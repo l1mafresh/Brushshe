@@ -217,47 +217,43 @@ class Brushshe(CTk):
             self.canvas.configure(bg=bg_getcolor)
         
     def show_sticker_choose(self):
-        sticker_choose = CTkToplevel(app)
-        sticker_choose.geometry("300x420")
-        sticker_choose.title("Оберіть наліпку")
-
-        # Segmented Button
-        def segmented_button_callback(value):
+        def update_btn():
             for widget in stickers_frame.winfo_children():
                 widget.destroy()
+            row = 0
+            column = 0
+            for name, image in self.stickers.items():
+                resized_image = image.resize((self.size_a, self.size_a))
+                image = ImageTk.PhotoImage(resized_image)
+                sticker_btn = CTkButton(stickers_frame, text=None, image=image, command=lambda img=image: self.set_current_sticker(img))
+                sticker_btn.grid(row=row, column=column, padx=10, pady=10)
+                column += 1
+                if column == 2:
+                    column = 0
+                    row +=1
+                    
+        sticker_choose = CTkToplevel(app)
+        sticker_choose.geometry("320x420")
+        sticker_choose.title("Оберіть наліпку")
                 
-            if value == "Обрати наліпку":
-                row = 0
-                column = 0
-                for name, image in self.stickers.items():
-                    resized_image = image.resize((self.size_a, self.size_a))
-                    image = ImageTk.PhotoImage(resized_image)
-                    sticker_btn = CTkButton(stickers_frame, text=None, image=image,
-                                            command=lambda img=image: self.set_current_sticker(img))
-                    sticker_btn.grid(row=row, column=column, padx=10, pady=10)
-                    column += 1
-                    if column == 2:
-                        column = 0
-                        row +=1
-            elif value == "Розмір наліпок":
-                self.st_size_label = CTkLabel(stickers_frame, text=self.size_a)
-                self.st_size_label.pack()
-                self.st_slider = CTkSlider(stickers_frame, from_=10, to=175, command=self.change_sticker_size)
-                self.st_slider.set(self.size_a)
-                self.st_slider.pack()
-                set_default = CTkButton(stickers_frame, text="Повернути як було", command=self.set_default_stickers_size)
-                set_default.pack()
-                
-        segemented_button = CTkSegmentedButton(sticker_choose, values=["Обрати наліпку", "Розмір наліпок"],
-                                                     command=segmented_button_callback)
-        segemented_button.set("Обрати наліпку")
-        segemented_button.pack()
-        
-        # Фрейм
-        stickers_frame = CTkScrollableFrame(sticker_choose, width=300, height=400)
+        tabview = CTkTabview(sticker_choose, command=update_btn)
+        tabview.add("Обрати наліпку")
+        tabview.add("Розмір наліпок")
+        tabview.set("Обрати наліпку")
+        tabview.pack()
+
+        stickers_frame = CTkScrollableFrame(tabview.tab("Обрати наліпку"), width=300, height=400)
         stickers_frame.pack()
 
-        segmented_button_callback("Обрати наліпку")
+        self.st_size_label = CTkLabel(tabview.tab("Розмір наліпок"), text=self.size_a)
+        self.st_size_label.pack()
+        self.st_slider = CTkSlider(tabview.tab("Розмір наліпок"), from_=10, to=175, command=self.change_sticker_size)
+        self.st_slider.set(self.size_a)
+        self.st_slider.pack()
+        set_default = CTkButton(tabview.tab("Розмір наліпок"), text="Повернути як було", command=self.set_default_stickers_size)
+        set_default.pack()
+
+        update_btn()
 
     def add_sticker(self, image, x, y):
         self.canvas.create_image(x, y, anchor=CENTER, image=image)
@@ -345,7 +341,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.4",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.5",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):

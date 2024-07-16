@@ -50,7 +50,7 @@ class Brushshe(CTk):
             "Чорний": "black"
         }
         for ukr_name, color in ukr_colors.items():
-            dropdown3.add_option(option=ukr_name, command=lambda color: self.change_bg(color))
+            dropdown3.add_option(option=ukr_name, command=lambda c=color: self.change_bg(c))
         dropdown3.add_separator()
         dropdown3.add_option(option="Інший колір", command=self.other_bg_color)
 
@@ -341,7 +341,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.5",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.6",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):

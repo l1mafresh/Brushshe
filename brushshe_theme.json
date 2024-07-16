@@ -84,10 +84,10 @@
   },
   "CTkOptionMenu": {
     "corner_radius": 6,
-    "fg_color": ["#3a7ebf", "#1f538d"],
+    "fg_color": ["#00d9d7", "#007e7c"],
     "button_color": ["#325882", "#14375e"],
     "button_hover_color": ["#234567", "#1e2c40"],
-    "text_color": ["#DCE4EE", "#DCE4EE"],
+    "text_color": ["black", "white"],
     "text_color_disabled": ["gray74", "gray60"]
   },
   "CTkComboBox": {

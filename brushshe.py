@@ -50,7 +50,7 @@ class Brushshe(CTk):
             "Чорний": "black"
         }
         for ukr_name, color in ukr_colors.items():
-            dropdown3.add_option(option=ukr_name, command=lambda c=color: self.change_bg(c))
+            dropdown3.add_option(option=ukr_name, command=lambda color: self.change_bg(color))
         dropdown3.add_separator()
         dropdown3.add_option(option="Інший колір", command=self.other_bg_color)
 
@@ -286,26 +286,26 @@ class Brushshe(CTk):
         self.setup_initialize()
 
     def text_settings(self):
+        def change_text_size(size):
+            self.font_size = int(size)
+            self.tx_size_label.configure(text=self.font_size)
+            
+        def optionmenu_callback(value):
+            self.tk_font = CTkFont(family=value, size=self.font_size)
+            
         text_settings = CTkToplevel(app)
         text_settings.title("Налаштувати текст")
         self.tx_size_label = CTkLabel(text_settings, text=self.font_size)
         self.tx_size_label.pack()
-        tx_size_slider = CTkSlider(text_settings, from_=11, to=96, command=self.change_text_size)
+        tx_size_slider = CTkSlider(text_settings, from_=11, to=96, command=change_text_size)
         tx_size_slider.set(self.font_size)
         tx_size_slider.pack()
 
         fonts_label = CTkLabel(text_settings, text="Шрифти з системи:")
         fonts_label.pack()
         fonts = list(font.families())
-        fonts_optionmenu = CTkOptionMenu(text_settings, values=fonts, command=self.optionmenu_callback)
+        fonts_optionmenu = CTkOptionMenu(text_settings, values=fonts, command=optionmenu_callback)
         fonts_optionmenu.pack()
-
-    def change_text_size(self, size):
-        self.font_size = int(size)
-        self.tx_size_label.configure(text=self.font_size)
-
-    def optionmenu_callback(self, value):
-        self.tk_font = CTkFont(family=value, size=self.font_size)
 
     def show_gallery_window(self):
         my_gallery = CTkToplevel(app)
@@ -345,7 +345,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.3",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.4",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):

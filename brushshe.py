@@ -138,12 +138,8 @@ class Brushshe(CTk):
 
         gc.disable() # бо ввімкнений gc думає що додані наліпки і текст - це сміття
 
-        self.setup_initialize()
-
-    def setup_initialize(self):
         self.canvas.bind("<B1-Motion>", self.paint)
         self.canvas.bind("<ButtonRelease-1>", self.stop_paint)
-        self.canvas.bind("<Button-1>", self.on_canvas_click)
 
     # -------------------- Функціонал --------------------
     def when_closing(self):
@@ -166,11 +162,6 @@ class Brushshe(CTk):
 
     def stop_paint(self, cur):
         self.prev_x, self.prev_y = (None, None)
-
-    def on_canvas_click(self, event):
-        if hasattr (self, "current_sticker") and self.current_sticker:
-            self.add_sticker(self.current_sticker, event.x, event.y)
-            self.current_sticker = None
 
     def open_img(self):
         file_path = filedialog.askopenfilename(filetypes=[("Зображення", "*.png;*.jpg;*.jpeg;*.gif"), ("Всі файли", "*.*")])
@@ -255,11 +246,14 @@ class Brushshe(CTk):
 
         update_btn()
 
-    def add_sticker(self, image, x, y):
-        self.canvas.create_image(x, y, anchor=CENTER, image=image)
-
-    def set_current_sticker(self, image):
+    def set_current_sticker(self, image): # Обрати наліпку
         self.current_sticker = image
+        if self.current_sticker:
+            self.canvas.bind("<Button-1>", self.add_sticker)
+
+    def add_sticker(self, event): # Додати наліпку
+        self.canvas.create_image(event.x, event.y, anchor='center', image=self.current_sticker)
+        self.canvas.unbind("<Button-1>")
 
     def change_sticker_size(self, value):
         self.size_a = int(self.st_slider.get())
@@ -270,16 +264,15 @@ class Brushshe(CTk):
         self.st_size_label.configure(text=self.size_a)
         self.st_slider.set(self.size_a)
 
-    def add_text_window_show(self):
+    def add_text_window_show(self): # Обрати текст
         dialog = CTkInputDialog(title="Введіть текст,", text="а потім клацніть на потрібне місце на малюнку")
         text = dialog.get_input()
         if text:
             self.canvas.bind("<Button-1>", lambda event, t=text: self.add_text(event, text))
 
-    def add_text(self, event, text):
+    def add_text(self, event, text): # Додати текст
         self.canvas.create_text(event.x, event.y, text=text, fill=self.color, font=self.tk_font)
         self.canvas.unbind("<Button-1>")
-        self.setup_initialize()
 
     def text_settings(self):
         def change_text_size(size):
@@ -341,7 +334,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.6",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.7",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
 
     def clean_all(self):
@@ -371,7 +364,6 @@ class Brushshe(CTk):
 
     def change_color(self, new_color):
         self.color = new_color
-        pass
 
     def other_color_choise(self):
         try:

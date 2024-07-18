@@ -26,7 +26,7 @@ class Brushshe(CTk):
         file_menu = menu.add_cascade("Файл")
         dropdown1 = CustomDropdownMenu(widget=file_menu)
         dropdown1.add_option(option="Відкрити з файлу", command=self.open_img)
-        dropdown1.add_option(option="Зберегти малюнок на комп'ютер", command=self.save_img)
+        dropdown1.add_option(option="Експортувати на ПК", command=self.export)
 
         mode_menu = menu.add_cascade("Режим")
         dropdown2 = CustomDropdownMenu(widget=mode_menu)
@@ -75,6 +75,8 @@ class Brushshe(CTk):
         dropdown4.add_option(option="Додати текст на малюнок", command=self.add_text_window_show)
         dropdown4.add_option(option="Налаштувати текст для вставлення", command=self.text_settings)
 
+        frames_menu = menu.add_cascade("Рамки", command=self.show_frames_window)
+
         my_gallery_menu = menu.add_cascade("Моя галерея", command=self.show_gallery_window)
 
         about_menu = menu.add_cascade("Про Brushshe", command=self.about_program)
@@ -85,9 +87,13 @@ class Brushshe(CTk):
 
         clean_btn = CTkButton(tools_frame, text="Очистити все", command=self.clean_all)
         clean_btn.pack(side=LEFT, padx=1)
+        
+        eraser_icon = CTkImage(light_image=Image.open("icons/eraser.png"), size=(20, 20))
+        eraser = CTkButton(tools_frame, text=None, width=35, image=eraser_icon, command=self.eraser)
+        eraser.pack(side=LEFT, padx=1)
 
-        brush_size_label = CTkLabel(tools_frame, text="Пензль:")
-        brush_size_label.pack(side=LEFT, padx=1)
+        self.brush_size_label = CTkLabel(tools_frame, text="Пензль:")
+        self.brush_size_label.pack(side=LEFT, padx=1)
 
         size_slider = CTkSlider(tools_frame, from_=1, to=50, command=self.change_brush_size)
         self.brush_size = 2
@@ -171,6 +177,7 @@ class Brushshe(CTk):
                 self.image = image
                 self.draw = ImageDraw.Draw(self.image)
                 self.canvas.delete("all")
+                self.canvas.configure(bg="white")
                 self.photo = ImageTk.PhotoImage(self.image)
                 self.canvas.create_image(0, 0, anchor=NW, image=self.photo)
             except Exception as e:
@@ -178,7 +185,7 @@ class Brushshe(CTk):
                                                message = f"Помилка - неможливо відкрити файл: {e}",
                                                icon="icons/cry.png", icon_size=(100,100), sound=True)
 
-    def save_img(self):
+    def export(self):
         # позиції канви
         x0 = self.canvas.winfo_rootx()
         y0 = self.canvas.winfo_rooty()
@@ -277,6 +284,7 @@ class Brushshe(CTk):
     def text_settings(self):
         def change_text_size(size):
             self.font_size = int(size)
+            self.tk_font.configure(size=self.font_size) 
             self.tx_size_label.configure(text=self.font_size)
             
         def optionmenu_callback(value):
@@ -294,8 +302,33 @@ class Brushshe(CTk):
         fonts_label.pack()
         fonts = list(font.families())
         fonts_optionmenu = CTkOptionMenu(text_settings, values=fonts, command=optionmenu_callback)
+        fonts_optionmenu.set(self.tk_font['family'])
         fonts_optionmenu.pack()
 
+    def show_frames_window(self):
+        def on_frames_click(index):
+            selected_frame = frames[index]
+            resized_image = selected_frame.resize((self.canvas.winfo_width(), self.canvas.winfo_height()))
+            self.frame_image = ImageTk.PhotoImage(resized_image)
+            self.canvas.create_image(0, 0, anchor="nw", image=self.frame_image)
+            
+        frames_win = CTkToplevel(app)
+        frames_win.title("Рамки")
+
+        frames_thumbnails = [
+            CTkImage(light_image=Image.open("frames_preview/frame1.png"), size=(100,100)),
+            CTkImage(light_image=Image.open("frames_preview/frame2.png"), size=(100,100)),
+            CTkImage(light_image=Image.open("frames_preview/frame3.png"), size=(100,100))
+            ]
+        frames = [
+            Image.open("frames/frame1.png"),
+            Image.open("frames/frame2.png"),
+            Image.open("frames/frame3.png")
+            ]
+        for i, image in enumerate(frames_thumbnails):
+            frames_btn = CTkButton(frames_win, text=None, image=image, command=lambda i=i: on_frames_click(i))
+            frames_btn.pack()
+        
     def show_gallery_window(self):
         my_gallery = CTkToplevel(app)
         my_gallery.title("Галерея Brushshe")
@@ -315,6 +348,7 @@ class Brushshe(CTk):
             self.image = image
             self.draw = ImageDraw.Draw(self.image)
             self.canvas.delete("all")
+            self.canvas.configure(bg="white")
             self.photo = ImageTk.PhotoImage(self.image)
             self.canvas.create_image(0, 0, anchor=NW, image=self.photo)
                 
@@ -334,8 +368,8 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.4.1.7",
-                                  icon="icons/brucklin.png", icon_size=(150,191), option_1="Зрозуміло", height=400)
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5",
+                                  icon="icons/brucklin.png", icon_size=(150,191), option_1="ОК", height=400)
 
     def clean_all(self):
         self.canvas.delete("all")
@@ -344,6 +378,10 @@ class Brushshe(CTk):
         self.brush_size = int(size)
         self.size_slider_label.configure(text=self.brush_size)
 
+    def eraser(self):
+        self.color = self.canvas.cget('bg')
+        self.brush_size_label.configure(text="Ластик:")
+        
     def save_in_gallery(self):
         # позиції канви
         x0 = self.canvas.winfo_rootx()
@@ -364,6 +402,7 @@ class Brushshe(CTk):
 
     def change_color(self, new_color):
         self.color = new_color
+        self.brush_size_label.configure(text="Пензль:")
 
     def other_color_choise(self):
         try:
@@ -378,9 +417,11 @@ class Brushshe(CTk):
     def show_other_color_btn(self):
         self.other_color_btn.pack(side=RIGHT, padx=1)
         self.other_color_btn.configure(fg_color=self.getcolor)
+        self.brush_size_label.configure(text="Пензль:")
 
     def changecolor2(self):
         self.color = self.getcolor
+        self.brush_size_label.configure(text="Пензль:")
         
 app = Brushshe()
 app.mainloop()

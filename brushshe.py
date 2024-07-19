@@ -56,19 +56,19 @@ class Brushshe(CTk):
 
         stickers_menu = menu.add_cascade("Наліпки", command=self.show_sticker_choose)
         # ширина і висота всіх зображень стікерів - 88 px
-        self.stickers = {
-            "Смайл": Image.open("stickers/smile.png"),
-            "Квітка": Image.open("stickers/flower.png"),
-            "Серце": Image.open("stickers/heart.png"),
-            "ОКей": Image.open("stickers/okay.png"),
-            "Сир": Image.open("stickers/cheese.png"),
-            "Трава": Image.open("stickers/grass.png"),
-            "Дощ": Image.open("stickers/rain.png"),
-            "Браклін": Image.open("stickers/brucklin.png"),
-            "Полуниця": Image.open("stickers/strawberry.png"),
-            "Метелик": Image.open("stickers/butterfly.png"),
-            "Квітка2": Image.open("stickers/flower2.png")
-        }
+        self.stickers = [
+            Image.open("stickers/smile.png"),
+            Image.open("stickers/flower.png"),
+            Image.open("stickers/heart.png"),
+            Image.open("stickers/okay.png"),
+            Image.open("stickers/cheese.png"),
+            Image.open("stickers/grass.png"),
+            Image.open("stickers/rain.png"),
+            Image.open("stickers/brucklin.png"),
+            Image.open("stickers/strawberry.png"),
+            Image.open("stickers/butterfly.png"),
+            Image.open("stickers/flower2.png")
+        ]
 
         add_text_menu = menu.add_cascade("Текст")
         dropdown4 = CustomDropdownMenu(widget=add_text_menu)
@@ -220,7 +220,7 @@ class Brushshe(CTk):
                 widget.destroy()
             row = 0
             column = 0
-            for name, image in self.stickers.items():
+            for image in self.stickers:
                 resized_image = image.resize((self.size_a, self.size_a))
                 image = ImageTk.PhotoImage(resized_image)
                 sticker_btn = CTkButton(stickers_frame, text=None, image=image, command=lambda img=image: self.set_current_sticker(img))
@@ -368,7 +368,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5.1",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="ОК", height=400)
 
     def clean_all(self):

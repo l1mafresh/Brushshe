@@ -62,6 +62,8 @@ class Brushshe(CTk):
             Image.open("stickers/heart.png"),
             Image.open("stickers/okay.png"),
             Image.open("stickers/cheese.png"),
+            Image.open("stickers/face2.png"),
+            Image.open("stickers/cat.png"),
             Image.open("stickers/grass.png"),
             Image.open("stickers/rain.png"),
             Image.open("stickers/brucklin.png"),
@@ -368,7 +370,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5.1",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5.2",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="ОК", height=400)
 
     def clean_all(self):

@@ -1,13 +1,10 @@
 from customtkinter import *
-from customtkinter import filedialog
 from CTkMenuBar import *
 from CTkColorPicker import *
 from CTkMessagebox import *
 from PIL import Image, ImageDraw, ImageTk, ImageGrab
-from tkinter import EventType, PhotoImage, font
-import gc
-import os
-import uuid
+from tkinter import PhotoImage, font
+import gc, os, uuid
 
 class Brushshe(CTk):
     def __init__(self):
@@ -19,13 +16,13 @@ class Brushshe(CTk):
         set_appearance_mode("system")
         self.protocol("WM_DELETE_WINDOW", self.when_closing)
 
-    # -------------------- Інтерфейс --------------------
+    # Інтерфейс
 # Меню
         menu = CTkMenuBar(self)
         
         file_menu = menu.add_cascade("Файл")
         dropdown1 = CustomDropdownMenu(widget=file_menu)
-        dropdown1.add_option(option="Відкрити з файлу", command=self.open_img)
+        dropdown1.add_option(option="Відкрити з файлу", command=self.open_image)
         dropdown1.add_option(option="Експортувати на ПК", command=self.export)
 
         mode_menu = menu.add_cascade("Режим")
@@ -54,7 +51,7 @@ class Brushshe(CTk):
         dropdown3.add_separator()
         dropdown3.add_option(option="Інший колір", command=self.other_bg_color)
 
-        stickers_menu = menu.add_cascade("Наліпки", command=self.show_sticker_choose)
+        stickers_menu = menu.add_cascade("Наліпки", command=self.show_stickers_choice)
         # ширина і висота всіх зображень стікерів - 88 px
         self.stickers = [
             Image.open("stickers/smile.png"),
@@ -72,14 +69,14 @@ class Brushshe(CTk):
             Image.open("stickers/flower2.png")
         ]
 
-        add_text_menu = menu.add_cascade("Текст")
-        dropdown4 = CustomDropdownMenu(widget=add_text_menu)
+        text_menu = menu.add_cascade("Текст")
+        dropdown4 = CustomDropdownMenu(widget=text_menu)
         dropdown4.add_option(option="Додати текст на малюнок", command=self.add_text_window_show)
         dropdown4.add_option(option="Налаштувати текст для вставлення", command=self.text_settings)
 
-        frames_menu = menu.add_cascade("Рамки", command=self.show_frames_window)
+        frame_menu = menu.add_cascade("Рамки", command=self.show_frame_choice)
 
-        my_gallery_menu = menu.add_cascade("Моя галерея", command=self.show_gallery_window)
+        gallery_menu = menu.add_cascade("Моя галерея", command=self.show_gallery)
 
         about_menu = menu.add_cascade("Про Brushshe", command=self.about_program)
 
@@ -94,43 +91,44 @@ class Brushshe(CTk):
         eraser = CTkButton(tools_frame, text=None, width=35, image=eraser_icon, command=self.eraser)
         eraser.pack(side=LEFT, padx=1)
 
-        self.brush_size_label = CTkLabel(tools_frame, text="Пензль:")
-        self.brush_size_label.pack(side=LEFT, padx=1)
+        self.tool_label = CTkLabel(tools_frame, text="Пензль:")
+        self.tool_label.pack(side=LEFT, padx=1)
 
         size_slider = CTkSlider(tools_frame, from_=1, to=50, command=self.change_brush_size)
         self.brush_size = 2
         size_slider.set(self.brush_size)
         size_slider.pack(side=LEFT, padx=5)
 
-        self.size_slider_label = CTkLabel(tools_frame, text="2")
-        self.size_slider_label.pack(side=LEFT, padx=1)
+        self.brush_size_label = CTkLabel(tools_frame, text="2")
+        self.brush_size_label.pack(side=LEFT, padx=1)
 
-        save_in_gallery_button = CTkButton(tools_frame, text="Зберегти в галерею", command=self.save_in_gallery)
-        save_in_gallery_button.pack(side=RIGHT, padx=5)
+        save_button = CTkButton(tools_frame, text="Зберегти в галерею", command=self.save_image)
+        save_button.pack(side=RIGHT, padx=5)
 
 # Канва
         self.canvas = CTkCanvas(self, bg="white")
         self.canvas.pack(fill=BOTH, expand=True)
 
-# Панель кольорів
-        self.color_frame = CTkFrame(self)
-        self.color_frame.pack(side=BOTTOM, fill=X)
+# Палітра
+        self.palette = CTkFrame(self)
+        self.palette.pack(side=BOTTOM, fill=X)
 
         self.colors = [
             "black", "red", "#2eff00", "blue", "yellow", "purple",
             "cyan", "pink", "orange", "brown", "gray", "white"
             ]
         for color in self.colors:
-            color_btn = CTkButton(self.color_frame, fg_color=color, text=None, width=35,
+            color_btn = CTkButton(self.palette, fg_color=color, text=None, width=35,
                                   border_width=2, command=lambda c=color: self.change_color(c))
             color_btn.pack(side=LEFT, padx=1)
 
-        other_color = CTkButton(self.color_frame, text="Інший", width=70, command=self.other_color_choise)
-        other_color.pack(side=RIGHT, padx=1)
+        choice_other_color = CTkButton(self.palette, text="Інший", width=70, command=self.other_color_choise)
+        choice_other_color.pack(side=RIGHT, padx=1)
 
-        self.other_color_btn = CTkButton(self.color_frame, text=None, width=35, border_width=2, command=self.changecolor2)
+        self.other_color_btn = CTkButton(self.palette, text=None, width=35,
+                                         border_width=2, command=self.select_other_color_btn)
 
-    # -------------------- Ініціалізація --------------------
+    # Ініціалізація
         self.color = "black"
 
         self.image = Image.new("RGB", (800, 600), "white")
@@ -149,7 +147,7 @@ class Brushshe(CTk):
         self.canvas.bind("<B1-Motion>", self.paint)
         self.canvas.bind("<ButtonRelease-1>", self.stop_paint)
 
-    # -------------------- Функціонал --------------------
+    # Функціонал
     def when_closing(self):
         closing_msg = CTkMessagebox(title = "Ви покидаєте Brushshe", message = "Зберегти малюнок?",
                                     option_1="Ні", option_2="Зберегти", option_3="Назад в Brushshe",
@@ -158,7 +156,7 @@ class Brushshe(CTk):
         if response == "Ні":
             app.destroy()
         elif response == "Зберегти":
-            self.save_in_gallery()
+            self.save_image()
         else:
             pass
 
@@ -171,7 +169,7 @@ class Brushshe(CTk):
     def stop_paint(self, cur):
         self.prev_x, self.prev_y = (None, None)
 
-    def open_img(self):
+    def open_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Зображення", "*.png;*.jpg;*.jpeg;*.gif"), ("Всі файли", "*.*")])
         if file_path:
             try:
@@ -209,6 +207,8 @@ class Brushshe(CTk):
 
     def change_bg(self, new_color):
         self.canvas.configure(bg=new_color)
+        if self.tool_label.cget('text') == "Ластик:":
+            self.eraser()
 
     def other_bg_color(self):
         pick_color = AskColor(title="Оберіть інший колір тла")
@@ -216,7 +216,7 @@ class Brushshe(CTk):
         if bg_getcolor:
             self.canvas.configure(bg=bg_getcolor)
         
-    def show_sticker_choose(self):
+    def show_stickers_choice(self):
         def update_btn():
             for widget in stickers_frame.winfo_children():
                 widget.destroy()
@@ -280,15 +280,15 @@ class Brushshe(CTk):
             self.canvas.bind("<Button-1>", lambda event, t=text: self.add_text(event, text))
 
     def add_text(self, event, text): # Додати текст
+        self.tk_font = CTkFont(family=self.tk_font['family'], size=self.font_size)
         self.canvas.create_text(event.x, event.y, text=text, fill=self.color, font=self.tk_font)
         self.canvas.unbind("<Button-1>")
 
     def text_settings(self):
         def change_text_size(size):
             self.font_size = int(size)
-            self.tk_font.configure(size=self.font_size) 
             self.tx_size_label.configure(text=self.font_size)
-            
+
         def optionmenu_callback(value):
             self.tk_font = CTkFont(family=value, size=self.font_size)
             
@@ -307,7 +307,7 @@ class Brushshe(CTk):
         fonts_optionmenu.set(self.tk_font['family'])
         fonts_optionmenu.pack()
 
-    def show_frames_window(self):
+    def show_frame_choice(self):
         def on_frames_click(index):
             selected_frame = frames[index]
             resized_image = selected_frame.resize((self.canvas.winfo_width(), self.canvas.winfo_height()))
@@ -331,7 +331,7 @@ class Brushshe(CTk):
             frames_btn = CTkButton(frames_win, text=None, image=image, command=lambda i=i: on_frames_click(i))
             frames_btn.pack()
         
-    def show_gallery_window(self):
+    def show_gallery(self):
         my_gallery = CTkToplevel(app)
         my_gallery.title("Галерея Brushshe")
         my_gallery.geometry("650x580")
@@ -370,7 +370,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5.2",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5.3",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="ОК", height=400)
 
     def clean_all(self):
@@ -378,13 +378,13 @@ class Brushshe(CTk):
 
     def change_brush_size(self, size):
         self.brush_size = int(size)
-        self.size_slider_label.configure(text=self.brush_size)
+        self.brush_size_label.configure(text=self.brush_size)
 
     def eraser(self):
         self.color = self.canvas.cget('bg')
-        self.brush_size_label.configure(text="Ластик:")
+        self.tool_label.configure(text="Ластик:")
         
-    def save_in_gallery(self):
+    def save_image(self):
         # позиції канви
         x0 = self.canvas.winfo_rootx()
         y0 = self.canvas.winfo_rooty()
@@ -394,17 +394,17 @@ class Brushshe(CTk):
         # вміст канви
         canvas_img = ImageGrab.grab(bbox=(x0, y0, x1, y1))
 
-        unique_filename = f"gallery/{uuid.uuid4()}.png"
+        image_name = f"gallery/{uuid.uuid4()}.png"
 
         saved = CTkMessagebox(title="Збережено",
                               message='Малюнок успішно збережено в галерею ("Моя галерея" в меню вгорі)!',
                               icon="icons/saved.png", icon_size=(100,100))
 
-        canvas_img.save(unique_filename)
+        canvas_img.save(image_name)
 
     def change_color(self, new_color):
         self.color = new_color
-        self.brush_size_label.configure(text="Пензль:")
+        self.tool_label.configure(text="Пензль:")
 
     def other_color_choise(self):
         try:
@@ -412,18 +412,15 @@ class Brushshe(CTk):
             self.getcolor = pick_color.get()
             if self.getcolor:
                 self.color = self.getcolor
-                self.show_other_color_btn()
+                self.other_color_btn.pack(side=RIGHT, padx=1)
+                self.other_color_btn.configure(fg_color=self.getcolor)
+                self.brush_size_label.configure(text="Пензль:")
         except:
             pass
         
-    def show_other_color_btn(self):
-        self.other_color_btn.pack(side=RIGHT, padx=1)
-        self.other_color_btn.configure(fg_color=self.getcolor)
-        self.brush_size_label.configure(text="Пензль:")
-
-    def changecolor2(self):
+    def select_other_color_btn(self):
         self.color = self.getcolor
-        self.brush_size_label.configure(text="Пензль:")
+        self.tool_label.configure(text="Пензль:")
         
 app = Brushshe()
 app.mainloop()

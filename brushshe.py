@@ -11,14 +11,13 @@ class Brushshe(CTk):
         super().__init__()
         self.title("Brushshe")
         self.geometry("650x580")
-        self.iconphoto(True, PhotoImage(file="icon.png"))
+        self.iconphoto(True, PhotoImage(file="icons/icon.png"))
         set_default_color_theme("brushshe_theme.json")
         set_appearance_mode("system")
         self.protocol("WM_DELETE_WINDOW", self.when_closing)
 
-    # Інтерфейс
-# Меню
-        menu = CTkMenuBar(self)
+        ''' Інтерфейс '''
+        menu = CTkMenuBar(self)   # Меню
         
         file_menu = menu.add_cascade("Файл")
         dropdown1 = CustomDropdownMenu(widget=file_menu)
@@ -51,37 +50,29 @@ class Brushshe(CTk):
         dropdown3.add_separator()
         dropdown3.add_option(option="Інший колір", command=self.other_bg_color)
 
-        stickers_menu = menu.add_cascade("Наліпки", command=self.show_stickers_choice)
         # ширина і висота всіх зображень стікерів - 88 px
-        self.stickers = [
-            Image.open("stickers/smile.png"),
-            Image.open("stickers/flower.png"),
-            Image.open("stickers/heart.png"),
-            Image.open("stickers/okay.png"),
-            Image.open("stickers/cheese.png"),
-            Image.open("stickers/face2.png"),
-            Image.open("stickers/cat.png"),
-            Image.open("stickers/grass.png"),
-            Image.open("stickers/rain.png"),
-            Image.open("stickers/brucklin.png"),
-            Image.open("stickers/strawberry.png"),
-            Image.open("stickers/butterfly.png"),
-            Image.open("stickers/flower2.png")
+        stickers_names = [
+            "smile", "flower", "heart", "okay", "cheese", "face2", "cat", "alien", "like",
+            "unicorn", "pineapple", "grass", "rain", "brucklin", "brushshe", "strawberry",
+            "butterfly", "flower2"
         ]
-
-        text_menu = menu.add_cascade("Текст")
-        dropdown4 = CustomDropdownMenu(widget=text_menu)
-        dropdown4.add_option(option="Додати текст на малюнок", command=self.add_text_window_show)
-        dropdown4.add_option(option="Налаштувати текст для вставлення", command=self.text_settings)
-
-        frame_menu = menu.add_cascade("Рамки", command=self.show_frame_choice)
+        self.stickers = [Image.open(f"stickers/{name}.png") for name in stickers_names]
+        
+        add_menu = menu.add_cascade("Додати")
+        dropdown4 = CustomDropdownMenu(widget=add_menu)
+        dropdown4.add_option(option="Наліпки", command=self.show_stickers_choice)
+        text_submenu = dropdown4.add_submenu("Текст")
+        text_submenu.add_option(option="Додати текст на малюнок", command=self.add_text_window_show)
+        text_submenu.add_option(option="Налаштувати текст для вставлення", command=self.text_settings)
+        dropdown4.add_option(option="Рамки", command=self.show_frame_choice)
 
         gallery_menu = menu.add_cascade("Моя галерея", command=self.show_gallery)
 
-        about_menu = menu.add_cascade("Про Brushshe", command=self.about_program)
-
-# Панель інструментів
-        tools_frame = CTkFrame(self)
+        other_menu = menu.add_cascade("Інше")
+        dropdown6 = CustomDropdownMenu(widget=other_menu)
+        dropdown6.add_option(option="Інфо", command=self.about_program)
+        
+        tools_frame = CTkFrame(self)   # Панель інструментів
         tools_frame.pack(side=TOP, fill=X)
 
         clean_btn = CTkButton(tools_frame, text="Очистити все", command=self.clean_all)
@@ -105,12 +96,10 @@ class Brushshe(CTk):
         save_button = CTkButton(tools_frame, text="Зберегти в галерею", command=self.save_image)
         save_button.pack(side=RIGHT, padx=5)
 
-# Канва
-        self.canvas = CTkCanvas(self, bg="white")
+        self.canvas = CTkCanvas(self, bg="white")   # Канва
         self.canvas.pack(fill=BOTH, expand=True)
 
-# Палітра
-        self.palette = CTkFrame(self)
+        self.palette = CTkFrame(self)   # Палітра
         self.palette.pack(side=BOTTOM, fill=X)
 
         self.colors = [
@@ -128,7 +117,7 @@ class Brushshe(CTk):
         self.other_color_btn = CTkButton(self.palette, text=None, width=35,
                                          border_width=2, command=self.select_other_color_btn)
 
-    # Ініціалізація
+        ''' Ініціалізація '''
         self.color = "black"
 
         self.image = Image.new("RGB", (800, 600), "white")
@@ -147,16 +136,14 @@ class Brushshe(CTk):
         self.canvas.bind("<B1-Motion>", self.paint)
         self.canvas.bind("<ButtonRelease-1>", self.stop_paint)
 
-    # Функціонал
+    ''' Функціонал '''
     def when_closing(self):
         closing_msg = CTkMessagebox(title = "Ви покидаєте Brushshe", message = "Зберегти малюнок?",
-                                    option_1="Ні", option_2="Зберегти", option_3="Назад в Brushshe",
+                                    option_1="Ні", option_2="Повернутися щоб зберегти",
                                     icon="icons/question.png", icon_size=(100,100), sound=True)
         response = closing_msg.get()
         if response == "Ні":
             app.destroy()
-        elif response == "Зберегти":
-            self.save_image()
         else:
             pass
 
@@ -317,16 +304,17 @@ class Brushshe(CTk):
         frames_win = CTkToplevel(app)
         frames_win.title("Рамки")
 
+        frames_names = ["frame1", "frame2", "frame3", "frame4", "frame5", "frame6", "frame7"]
         frames_thumbnails = [
-            CTkImage(light_image=Image.open("frames_preview/frame1.png"), size=(100,100)),
-            CTkImage(light_image=Image.open("frames_preview/frame2.png"), size=(100,100)),
-            CTkImage(light_image=Image.open("frames_preview/frame3.png"), size=(100,100))
-            ]
+            CTkImage(light_image=Image.open(f"frames_preview/{name}.png"), size=(70, 70))
+            for name in frames_names
+        ]
+
         frames = [
-            Image.open("frames/frame1.png"),
-            Image.open("frames/frame2.png"),
-            Image.open("frames/frame3.png")
-            ]
+            Image.open(f"frames/{name}.png")
+            for name in frames_names
+        ]
+        
         for i, image in enumerate(frames_thumbnails):
             frames_btn = CTkButton(frames_win, text=None, image=image, command=lambda i=i: on_frames_click(i))
             frames_btn.pack()
@@ -346,14 +334,22 @@ class Brushshe(CTk):
         column = 0
 
         def open_from_gallery(img_path):
-            image = Image.open(img_path)
-            self.image = image
-            self.draw = ImageDraw.Draw(self.image)
-            self.canvas.delete("all")
-            self.canvas.configure(bg="white")
-            self.photo = ImageTk.PhotoImage(self.image)
-            self.canvas.create_image(0, 0, anchor=NW, image=self.photo)
-                
+            open_msg = CTkMessagebox(title = "Відкриття малюнку",
+                                     message = "Малюнок, що Ви малюєте зараз, буде втрачено, якщо він не збережений і замінено на малюнок з галереї. Продовжити?",
+                                     option_1="Так", option_2="Повернутися",
+                                     icon="icons/question.png", icon_size=(100,100), sound=True)
+            response = open_msg.get()
+            if response == "Повернутися":
+                pass
+            else:
+                image = Image.open(img_path)
+                self.image = image
+                self.draw = ImageDraw.Draw(self.image)
+                self.canvas.delete("all")
+                self.canvas.configure(bg="white")
+                self.photo = ImageTk.PhotoImage(self.image)
+                self.canvas.create_image(0, 0, anchor=NW, image=self.photo)
+            
         for filename in os.listdir("gallery"):
             if filename.endswith(".png"):
                 img_path = os.path.join("gallery", filename)
@@ -370,7 +366,7 @@ class Brushshe(CTk):
         
     def about_program(self):
         about_msg = CTkMessagebox(title="Про програму",
-                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.5.3",
+                                  message="Brushshe (Брашше) - програма для малювання, в якій можна створювати те, що Вам подобається.\n\nОрел на ім'я Brucklin (Браклін) - її талісман.\n\nhttps://github.com/l1mafresh/Brushshe\n\nv0.6",
                                   icon="icons/brucklin.png", icon_size=(150,191), option_1="ОК", height=400)
 
     def clean_all(self):
